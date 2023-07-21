@@ -96,13 +96,13 @@ onMounted(update);
 
 <style scoped>
 .gameOver {
-  position: fixed;
+  /*position: fixed;
   left: 0;
   top: 0;
   right: 0;
   bottom: 0;
   width: 100vw;
-  height: 100dvh;
+  height: 100dvh;*/
   background: #000000;
   z-index: 99999;
   display: flex;
@@ -125,11 +125,6 @@ onMounted(update);
   height: 100%;
 }
 
-* {
-  font-family: "Play", sans-serif;
-  user-select: none;
-}
-
 button {
   display: inline-block;
 }
@@ -145,7 +140,6 @@ button {
   cursor: pointer;
   font-size: 5vmin;
   border: 1px dotted #00ff00;
-  color: #00ff00;
   background: #000000;
   width: 20vw;
   padding: 1vh 2vw;
