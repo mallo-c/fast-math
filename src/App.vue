@@ -1,21 +1,20 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
+import settings from "@/settings";
 
-
-const MAX = 3;
-const MAX_RATING = 7;
-const FULL_TIME = 4000;
+const MAX = settings.answerVariants;
+const MAX_RATING = settings.numberOfStars;
+const FULL_TIME = settings.answerTime * 1000;
 
 const eq = ref("");
 const variants = ref(Array(MAX).fill(0))
-const LEVEL = ref(10);
 const correct = ref(0);
-const corr = ref(0);
+const correctAnswer = ref(0);
 const total = ref(0);
-const remaining = ref(FULL_TIME);
-const asCssUnits = computed({
+const remainingTimeRaw = ref(FULL_TIME);
+const remainingTimeAsCssUnits = computed({
   get() {
-    return remaining.value / FULL_TIME * 100 + "vw";
+    return remainingTimeRaw.value / FULL_TIME * 100 + "vw";
   },
   set() {
   }
@@ -30,41 +29,44 @@ const rating = computed({
 })
 
 const mainInterval = setInterval(() => {
-  remaining.value -= 10;
-  if (remaining.value <= 0) {
+  remainingTimeRaw.value -= 10;
+  if (remainingTimeRaw.value <= 0) {
     clearInterval(mainInterval);
     console.log(rating.value, MAX_RATING - rating.value);
   }
 }, 10);
 
-function rand() {
-  return Math.floor(Math.random() * Math.max(LEVEL.value, 10)) + 1
+function rand(): number {
+  if (typeof settings.taskGenerator.maxNumber == "number") {
+    return Math.floor(Math.random() * settings.taskGenerator.maxNumber) + 1;
+  } else {
+    switch (settings.taskGenerator.maxNumber) {
+      case "linear":
+        return Math.floor(Math.random() * total.value * settings.taskGenerator.ratio) + settings.taskGenerator.minNumber;
+    }
+  }
 }
 
 function update() {
-  LEVEL.value = correct.value + 1;
+  total.value += 1;
   let a = rand(), b = rand();
   eq.value = a + "+" + b + "=?";
-  corr.value = a + b;
+  correctAnswer.value = a + b;
   const id = Math.floor(Math.random() * MAX);
-  variants.value = [a + b];
-  for (let i = 0; i < id; ++i) {
-    variants.value.push(rand() + rand());
-  }
-  for (let i = 0; i < MAX - id - 1; ++i) {
-    variants.value.unshift(rand() + rand());
-  }
+  variants.value = Array(MAX).fill(null).map(()=>(rand() + rand()));
+  variants.value[id] = a+b;
   variants.value = [...variants.value];
 }
 
 function check(e: MouseEvent) {
-  total.value += 1;
   const n = parseInt((e.target as HTMLElement).innerHTML.trim());
-  if (n == corr.value) {
+  if (n == correctAnswer.value) {
+    if (settings.doReset) remainingTimeRaw.value = FULL_TIME;
     correct.value += 1;
-    remaining.value = FULL_TIME;
     update();
   } else {
+    if (settings.doReset && settings.resetTimeIfWrong) remainingTimeRaw.value = FULL_TIME;
+    remainingTimeRaw.value -= settings.penalty;
     document.body.classList.add("error");
     setTimeout(() => {
       document.body.classList.remove("error");
@@ -78,32 +80,26 @@ onMounted(update);
 </script>
 
 <template>
-  <div class="statusbar" v-if="remaining > 0">
+  <div class="statusbar" v-if="remainingTimeRaw > 0">
     <div id="sp-main"></div>
   </div>
-  <h1 v-if="remaining > 0">{{ eq }}</h1>
-  <div class="btn-group" v-if="remaining > 0">
+  <h1 v-if="remainingTimeRaw > 0">{{ eq }}</h1>
+  <div class="btn-group" v-if="remainingTimeRaw > 0">
     <button v-for="i in variants" @click="check($event)">{{ i }}</button>
   </div>
-  <div class="gameOver" v-if="remaining <= 0">
+  <div class="gameOver" v-if="remainingTimeRaw <= 0">
     <h1>Game over</h1>
+    <h2>{{correct}} of {{total}} are correct ({{Math.floor(correct/total*1000)/10 || 0}}%)</h2>
     <h2>Your rating:</h2>
     <p>
-      <span v-for="i in rating"><i class="fas fa-star">{{i}}</i></span>
-      <span v-for="i in MAX_RATING - rating"><i class="far fa-star">{{i}}</i></span>
+      <span v-for="i in rating"><i class="fas fa-star">{{ i }}</i></span>
+      <span v-for="i in MAX_RATING - rating"><i class="far fa-star">{{ i }}</i></span>
     </p>
   </div>
 </template>
 
 <style scoped>
 .gameOver {
-  /*position: fixed;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100dvh;*/
   background: #000000;
   z-index: 99999;
   display: flex;
@@ -121,7 +117,7 @@ onMounted(update);
 }
 
 #sp-main {
-  width: v-bind(asCssUnits);
+  width: v-bind(remainingTimeAsCssUnits);
   background: #00ff00;
   height: 100%;
 }
