@@ -29,7 +29,7 @@ const rating = computed({
   }
 })
 
-let mainInterval = setInterval(() => {
+const mainInterval = setInterval(() => {
   remaining.value -= 10;
   if (remaining.value <= 0) {
     clearInterval(mainInterval);
@@ -74,6 +74,7 @@ function check(e: MouseEvent) {
 }
 
 onMounted(update);
+
 </script>
 
 <template>
