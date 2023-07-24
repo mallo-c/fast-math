@@ -5,6 +5,7 @@ A math game about fast counting.
 ```
 npm install
 npm run build
+cd dist
 npx serve
 ```
 ## Custom settings
