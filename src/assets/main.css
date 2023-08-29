@@ -2,7 +2,7 @@
   box-sizing: border-box;
   font-family: "Play", sans-serif;
   user-select: none;
-  color: #00ff00!important;
+  color: #00ff00 !important;
 }
 
 html, body, #container, #app {
@@ -22,14 +22,6 @@ body, #app {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-}
-
-body.error {
-  background: #ff0000!important;
-}
-
-body.error * {
-  display: none!important;
 }
 
 #app {

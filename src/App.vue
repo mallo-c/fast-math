@@ -1,32 +1,28 @@
-<script setup lang="ts">
-import {computed, onMounted, ref} from "vue";
+<script lang="ts">
 import settings from "@/settings";
 
-const MAX = settings.answerVariants;
+const ANSWER_VARIANTS = settings.answerVariants;
 const MAX_RATING = settings.numberOfStars;
 const FULL_TIME = settings.answerTime * 1000;
 
-const eq = ref("");
-const variants = ref(Array(MAX).fill(0))
-const correct = ref(0);
+</script>
+
+<script setup lang="ts">
+import {computed, onMounted, ref} from "vue";
+/// <reference path="@/shims-vue.d.ts" />
+import Star from "@/components/Star.vue";
+
+const equation = ref("");
+const variants = ref(Array(ANSWER_VARIANTS).fill(0))
+const numberOfCorrectAnswers = ref(0);
 const correctAnswer = ref(0);
 const total = ref(0);
 const remainingTimeRaw = ref(FULL_TIME);
-const remainingTimeAsCssUnits = computed({
-  get() {
-    return remainingTimeRaw.value / FULL_TIME * 100 + "vw";
-  },
-  set() {
-  }
-})
 
-const rating = computed({
-  get() {
-    return Math.round(correct.value / Math.max(1, total.value) * MAX_RATING)
-  },
-  set() {
-  }
-})
+// because v-bind() in css allows only property name
+const remainingTimeAsCssUnits = computed(() => remainingTimeRaw.value / FULL_TIME * 100 + "vw");
+
+const rating = computed(()=>Math.round(numberOfCorrectAnswers.value / Math.max(1, total.value) * MAX_RATING))
 
 const mainInterval = setInterval(() => {
   remainingTimeRaw.value -= 10;
@@ -50,11 +46,11 @@ function rand(): number {
 function update() {
   total.value += 1;
   let a = rand(), b = rand();
-  eq.value = a + "+" + b + "=?";
+  equation.value = a + "+" + b + "=?";
   correctAnswer.value = a + b;
-  const id = Math.floor(Math.random() * MAX);
-  variants.value = Array(MAX).fill(null).map(()=>(rand() + rand()));
-  variants.value[id] = a+b;
+  const id = Math.floor(Math.random() * ANSWER_VARIANTS);
+  variants.value = Array(ANSWER_VARIANTS).fill(null).map(() => (rand() + rand()));
+  variants.value[id] = a + b;
   variants.value = [...variants.value];
 }
 
@@ -62,7 +58,7 @@ function check(e: MouseEvent) {
   const n = parseInt((e.target as HTMLElement).innerHTML.trim());
   if (n == correctAnswer.value) {
     if (settings.doReset) remainingTimeRaw.value = FULL_TIME;
-    correct.value += 1;
+    numberOfCorrectAnswers.value += 1;
     update();
   } else {
     if (settings.doReset && settings.resetTimeIfWrong) remainingTimeRaw.value = FULL_TIME;
@@ -83,20 +79,37 @@ onMounted(update);
   <div class="statusbar" v-if="remainingTimeRaw > 0">
     <div id="sp-main"></div>
   </div>
-  <h1 v-if="remainingTimeRaw > 0">{{ eq }}</h1>
+  <h1 v-if="remainingTimeRaw > 0">{{ equation }}</h1>
   <div class="btn-group" v-if="remainingTimeRaw > 0">
     <button v-for="i in variants" @click="check($event)">{{ i }}</button>
   </div>
   <div class="gameOver" v-if="remainingTimeRaw <= 0">
     <h1>Game over</h1>
-    <h2>{{correct}} of {{total}} are correct ({{Math.floor(correct/total*1000)/10 || 0}}%)</h2>
+    <h2>{{ numberOfCorrectAnswers }} of {{ total }} are numberOfCorrectAnswers
+      ({{ Math.floor(numberOfCorrectAnswers / total * 1000) / 10 || 0 }}%)</h2>
     <h2>Your rating:</h2>
     <p>
-      <span v-for="i in rating"><i class="fas fa-star">{{ i }}</i></span>
-      <span v-for="i in MAX_RATING - rating"><i class="far fa-star">{{ i }}</i></span>
+      <!--suppress JSUnusedLocalSymbols -->
+      <Star full="yes" size="48" v-for="i in rating" />
+      <!--suppress JSUnusedLocalSymbols -->
+      <Star size="48" v-for="i in MAX_RATING - rating"/>
     </p>
   </div>
 </template>
+
+<!-- For WebStorm -->
+<!--suppress CssUnusedSymbol -->
+<style>
+
+body.error {
+  background: #ff0000 !important;
+}
+
+body.error * {
+  display: none !important;
+}
+
+</style>
 
 <style scoped>
 .gameOver {
