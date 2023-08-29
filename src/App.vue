@@ -85,7 +85,7 @@ onMounted(update);
   </div>
   <div class="gameOver" v-if="remainingTimeRaw <= 0">
     <h1>Game over</h1>
-    <h2>{{ numberOfCorrectAnswers }} of {{ total }} are numberOfCorrectAnswers
+    <h2>{{ numberOfCorrectAnswers }} of {{ total }} are correct
       ({{ Math.floor(numberOfCorrectAnswers / total * 1000) / 10 || 0 }}%)</h2>
     <h2>Your rating:</h2>
     <p>
