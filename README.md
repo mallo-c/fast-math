@@ -1,12 +1,13 @@
 # Fast math
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/8ed658cc-b686-4fa4-aec1-4fb339012496/deploy-status)](https://app.netlify.com/sites/fast-math-mallo-c/deploys)
+
+A math game about fast counting.
 ## Note
 The project is abandoned, but that does not mean it's unsafe. If I find any vulnerabilities, I'll patch them as fast as I can. If you find any vulnerabilities, please let me know. See my profile for contact information.
 
 It's safe to use it for now.
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/8ed658cc-b686-4fa4-aec1-4fb339012496/deploy-status)](https://app.netlify.com/sites/fast-math-mallo-c/deploys)
-
-A math game about fast counting.
 ## Build and run
 ```
 npm install
